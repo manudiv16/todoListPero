@@ -1,9 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+
 module Lib
     ( main
     ) where
 
+import Database.SQLite.Simple.ToRow
 import Database.SQLite.Simple
 
 import Data.Time
@@ -63,6 +65,15 @@ printToolQuery q =  withConn "tools.db" $
                          \conn ->  do
                            resp <- query_ conn q :: IO [Tool]
                            mapM_ print resp
+                           
+printToolQuery_ :: ToRow a => Query -> a -> IO ()
+printToolQuery_ q a =  withConn "tools.db" $
+                         \conn ->  do
+                           resp <- query conn q a :: IO [User]
+                           mapM_ print resp                         
+
+printByNQuery :: Int -> IO ()
+printByNQuery i = printToolQuery_  (mconcat  ["SELECT * FROM users WHERE ID = ?;"])  (Only i) 
 
 printTools :: IO ()
 printTools =  printToolQuery "SELECT * FROM tools;"
